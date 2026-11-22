@@ -1,9 +1,10 @@
 import Foundation
+import SuiteCore
 
 /// Launcher's settings, kept in its user defaults. Launcher reads them as its own; Explorer Settings
-/// reads and writes them through `forExplorer`.
+/// will read and write them through `forManager`.
 public final class LauncherSettings {
-    public static let bundleID = "local.explorer.Launcher"
+    public static let bundleID = LauncherApp.bundleID
 
     private let defaults: UserDefaults
 
@@ -11,7 +12,7 @@ public final class LauncherSettings {
         self.defaults = defaults
     }
 
-    public static func forExplorer() -> LauncherSettings {
+    public static func forManager() -> LauncherSettings {
         LauncherSettings(defaults: UserDefaults(suiteName: bundleID) ?? .standard)
     }
 

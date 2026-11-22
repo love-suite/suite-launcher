@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "suite-core",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/paul-amour/suite-core",
+      "state" : {
+        "revision" : "0a3a240057e8616114e56d2866aae538dfbd425c",
+        "version" : "27.1.0-dev.1"
+      }
+    }
+  ],
+  "version" : 2
+}

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>local.explorer.Launcher</string>
+    <string>local.suite.launcher</string>
     <key>CFBundleName</key>
     <string>Launcher</string>
     <key>CFBundleDisplayName</key>

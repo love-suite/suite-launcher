@@ -1,7 +1,11 @@
 import AppKit
+import SuiteCore
 
-/// Explorer Launcher: Launchpad replacement for macOS. Launched by Explorer on demand; a click on
-/// the Launcher tile in Explorer's Dock (when added) or a `LauncherMessage.open` shows the grid.
+/// Launcher: Launchpad replacement for macOS. Started on demand; a click on Bar's Launcher tile (when
+/// added) or a `LauncherMessage.open` shows the grid.
+// Reopened by the previous copy (an update): once it is gone, this copy carries on.
+AppRelauncher.waitForPreviousCopy()
+
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 let delegate = LauncherAppDelegate()
