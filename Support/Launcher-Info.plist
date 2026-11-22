@@ -24,7 +24,10 @@
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>
     <true/>
-    <!-- Full-screen overlay, no Dock icon of its own. -->
+    <!-- An agent: activating a regular app that has no window on the current Space (a click on its
+         Dock icon) makes macOS leave that Space, full-screen apps included. Kept in the Dock, its icon
+         still opens the grid (reopen). -->
+
     <key>LSUIElement</key>
     <true/>
 </dict>

@@ -16,6 +16,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "LauncherCore", dependencies: [suiteCore]),
+        .testTarget(name: "LauncherCoreTests", dependencies: ["LauncherCore"]),
         .executableTarget(name: "Launcher", dependencies: ["LauncherCore", suiteCore]),
     ]
 )

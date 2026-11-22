@@ -12,6 +12,9 @@ final class LauncherAppDelegate: NSObject, NSApplicationDelegate {
     /// Launcher keeps itself up to date from its own releases, once its grid is closed.
     static let updater = SuiteUpdater(appName: "Launcher")
 
+    private var spaceObserver: NSObjectProtocol?
+    private var activationObserver: NSObjectProtocol?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         Self.updater.start()
         window.contentViewController = viewController
@@ -24,6 +27,19 @@ final class LauncherAppDelegate: NSObject, NSApplicationDelegate {
             settings.reload()
             viewController.settings = settings
         }
+
+        spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil, queue: .main) { [weak self] _ in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self?.hide() }
+        }
+        activationObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil, queue: .main) { [weak self] note in
+            let activated = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            guard let self, activated?.processIdentifier != getpid(), self.window.isVisible else { return }
+            self.hide()
+        }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -32,9 +48,10 @@ final class LauncherAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func show() {
-        window.setFrame(NSScreen.main?.frame ?? .zero, display: true)
+        let mouse = NSEvent.mouseLocation
+        let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main
+        window.setFrame(screen?.frame ?? .zero, display: true)
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
         viewController.prepareToShow()
     }
 
