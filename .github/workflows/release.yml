@@ -97,11 +97,13 @@ jobs:
         if: ${{ env.GH_TOKEN != '' }}
         run: |
           CASK="Casks/launcher.rb"
-          FILE="$(gh api "repos/paul-amour/homebrew-suite/contents/$CASK" --jq '{sha: .sha, content: .content}')"
+          FILE="$(gh api "repos/$GITHUB_REPOSITORY_OWNER/homebrew-tap/contents/$CASK" --jq '{sha: .sha, content: .content}')"
           SHA="$(printf %s "$FILE" | jq -r .sha)"
           printf %s "$FILE" | jq -r .content | base64 --decode \
-              | sed -E "s/^  version \".*\"/  version \"$VERSION\"/; s/^  sha256 \".*\"/  sha256 \"$SHA256\"/" > "$RUNNER_TEMP/cask.rb"
-          gh api --method PUT "repos/paul-amour/homebrew-suite/contents/$CASK" \
+              | sed -E "s/^  version \".*\"/  version \"$VERSION\"/; s/^  sha256 \".*\"/  sha256 \"$SHA256\"/" \
+              | sed -E "s#github\.com/[^/]+/#github.com/$GITHUB_REPOSITORY_OWNER/#g; s#\"[^/\"]+/tap/#\"$GITHUB_REPOSITORY_OWNER/tap/#g" \
+              > "$RUNNER_TEMP/cask.rb"
+          gh api --method PUT "repos/$GITHUB_REPOSITORY_OWNER/homebrew-tap/contents/$CASK" \
               -f message="launcher $VERSION" -f sha="$SHA" -f content="$(base64 < "$RUNNER_TEMP/cask.rb")" >/dev/null
 
       - name: Forget the certificate

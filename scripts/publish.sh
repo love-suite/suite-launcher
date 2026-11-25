@@ -6,8 +6,9 @@
 # AA.Y is made in the suite repository, which brings every app to it (sync-version.yml).
 set -eu
 cd "$(dirname "$0")/.."
-REPO="$(cat Support/update-repository.txt 2>/dev/null || true)"
-[ -n "$REPO" ] || { echo "No repository: put its owner/name in Support/update-repository.txt"; exit 1; }
+REPO="$(git config --get remote.origin.url 2>/dev/null \
+    | sed -nE 's#^(https://github\.com/|git@github\.com:)([^/]+/[^/]+)$#\2#p' | sed 's/\.git$//')"
+[ -n "$REPO" ] || { echo "No repository: origin isn't a GitHub repository."; exit 1; }
 [ -s Support/update-public-key.txt ] || { echo "No update key yet: see the suite repository's scripts/update-key.sh"; exit 1; }
 [ -s Support/release-certificate.cer ] || { echo "No release certificate yet: see the suite repository's scripts/release-certificate.sh"; exit 1; }
 [ "$(git rev-parse --abbrev-ref HEAD)" = main ] || { echo "Publish from main."; exit 1; }

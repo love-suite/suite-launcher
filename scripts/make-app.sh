@@ -15,6 +15,12 @@ ICON=""
 
 # before_build: what runs before building. add_to_bundle <app>: what this app adds to its bundle
 # (resources, embedded helpers) before it is signed. relaunch: how a running copy starts again.
+# SwiftPM records the deployment target (macOS 13) as the SDK an executable was built with, and macOS then
+# draws its windows as for an app of that time (the old controls). The SDK actually used is recorded instead,
+# so the app looks as the latest macOS does.
+stamp_sdk() {
+    vtool -set-build-version macos 13.0 "$(xcrun --show-sdk-version)" -replace -output "$1" "$1"
+}
 before_build() { :; }
 # A blue grid icon drawn from the square.grid.3x3.fill symbol, at build.
 make_icon() {
@@ -75,7 +81,7 @@ done
 
 # macOS ties folder permissions to the signature. An ad-hoc one changes with every build, so access is
 # asked again each time; a certificate keeps it stable. Set SIGN_IDENTITY to use another certificate.
-IDENTITY="${SIGN_IDENTITY:-Explorer Local Signing}"
+IDENTITY="${SIGN_IDENTITY:-Suite Local Signing}"
 if ! security find-identity -p codesigning | grep -q "\"$IDENTITY\""; then
     # A certificate asked for by name (a release) is never replaced by ad-hoc signing.
     [ -z "${SIGN_IDENTITY:-}" ] || { echo "No \"$IDENTITY\" certificate found."; exit 1; }
@@ -95,14 +101,17 @@ if [ "$(git describe --exact-match --tags HEAD 2>/dev/null)" != "v$VERSION" ]; t
     VERSION="$VERSION-dev.$DEV"
 fi
 UPDATE_KEY="$(cat Support/update-public-key.txt 2>/dev/null || true)"
-# Where this app's releases are published: the GitHub repository (owner/name) in this file.
-UPDATE_REPO="$(cat Support/update-repository.txt 2>/dev/null || true)"
+# Where this app's releases are published: the GitHub repository it is built from (owner/name), so
+# moving it or renaming the organization changes nothing here. GitHub's own value in CI, else origin's.
+UPDATE_REPO="${GITHUB_REPOSITORY:-$(git config --get remote.origin.url 2>/dev/null \
+    | sed -nE 's#^(https://github\.com/|git@github\.com:)([^/]+/[^/]+)$#\2#p' | sed 's/\.git$//')}"
 PRODUCTS_DIR=".build/out/Products/Release"
 
 APP="build/$APP_NAME.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp ".build/release/$EXECUTABLE" "$APP/Contents/MacOS/$EXECUTABLE"
+stamp_sdk "$APP/Contents/MacOS/$EXECUTABLE"
 cp "$INFO_PLIST" "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" -c "Set :CFBundleVersion $BUILD" \
     -c "Add :SuiteBuildBranch string $BRANCH" -c "Add :SuiteBuildCommit string $COMMIT" \
@@ -118,6 +127,8 @@ make_icon "$APP/Contents/Resources/AppIcon.icns"
 add_to_bundle "$APP"
 # SuiteCore's strings (the updater's dialogs), when the app uses SuiteCore.
 [ ! -d "$PRODUCTS_DIR/SuiteCore_SuiteCore.bundle" ] || cp -r "$PRODUCTS_DIR/SuiteCore_SuiteCore.bundle" "$APP/Contents/Resources/"
+# The file views' strings, when the app uses suite-files' views.
+[ ! -d "$PRODUCTS_DIR/SuiteFiles_SuiteFilesUI.bundle" ] || cp -r "$PRODUCTS_DIR/SuiteFiles_SuiteFilesUI.bundle" "$APP/Contents/Resources/"
 codesign --force --sign "$IDENTITY" "$APP"
 echo "Built $APP"
 

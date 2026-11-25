@@ -1,7 +1,7 @@
 import Foundation
 import SuiteCore
 
-/// Launcher's settings, kept in its user defaults. Launcher reads them as its own; Explorer Settings
+/// Launcher's settings, kept in its user defaults. Launcher reads them as its own; Suite Settings
 /// will read and write them through `forManager`.
 public final class LauncherSettings {
     public static let bundleID = LauncherApp.bundleID

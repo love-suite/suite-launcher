@@ -3,9 +3,9 @@
     {
       "identity" : "suite-core",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/paul-amour/suite-core",
+      "location" : "https://github.com/love-suite/suite-core",
       "state" : {
-        "revision" : "0a3a240057e8616114e56d2866aae538dfbd425c",
+        "revision" : "9d3408c70928823153f37be565cacf192d7f5fca",
         "version" : "27.1.0-dev.1"
       }
     }
